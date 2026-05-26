@@ -10,48 +10,65 @@ class ProductController extends Controller
     //
     public function index()
     {
-        $products = Product::all();
-        return Inertia::render('Products/List', [
-            'products' => $products,
-        ]);
+        try {
+            $products = Product::all();
+
+            return Inertia::render('Products/List', [
+                'products' => $products,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to retrieve products'], 500);
+        }
     }
 
     public function store()
     {
-        $validatedData = request()->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'required|string',
-            'image_url' => 'nullable|url',
-            'price' => 'required|numeric|min:0',
-            'is_available' => 'required|boolean',
-        ]);
+        try {
+            $validatedData = request()->validate([
+                'name' => 'required|string|max:255',
+                'description' => 'required|string',
+                'image_url' => 'nullable|url',
+                'price' => 'required|numeric|min:0',
+                'is_available' => 'required|boolean',
+            ]);
 
-        Product::create($validatedData);
+            Product::create($validatedData);
 
-        return Inertia::render('Products/Add');
+            return redirect()->route('products.index');
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to create product'], 500);
+        }
     }
 
     public function update(Product $product)
     {
-        $validatedData = request()->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'required|string',
-            'image_url' => 'nullable|url',
-            'price' => 'required|numeric|min:0',
-            'is_available' => 'required|boolean',
-        ]);
+        try {
+            $validatedData = request()->validate([
+                'name' => 'required|string|max:255',
+                'description' => 'required|string',
+                'image_url' => 'nullable|url',
+                'price' => 'required|numeric|min:0',
+                'is_available' => 'required|boolean',
+            ]);
 
-        $product->update($validatedData);
+            $product->update($validatedData);
 
-        return Inertia::render('Products/Edit', [
-            'product' => $product,
-        ]);
+            return Inertia::render('Products/Edit', [
+                'product' => $product,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to update product'], 500);
+        }
     }
 
     public function destroy(Product $product)
     {
-        $product->delete();
+        try {
+            $product->delete();
 
-        return Inertia::render('Products/List');
+            return Inertia::render('Products/List');
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to delete product'], 500);
+        }
     }
 }

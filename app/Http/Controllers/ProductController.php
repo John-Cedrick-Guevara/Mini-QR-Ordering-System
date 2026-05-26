@@ -13,7 +13,7 @@ class ProductController extends Controller
         try {
             $products = Product::all();
 
-            return Inertia::render('Products/List', [
+            return Inertia::render('Welcome', [
                 'products' => $products,
             ]);
         } catch (\Exception $e) {
@@ -53,8 +53,8 @@ class ProductController extends Controller
 
             $product->update($validatedData);
 
-            return Inertia::render('Products/Edit', [
-                'product' => $product,
+            return Inertia::render('Welcome', [
+                'products' => Product::all(),
             ]);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Failed to update product'], 500);
@@ -66,7 +66,9 @@ class ProductController extends Controller
         try {
             $product->delete();
 
-            return Inertia::render('Products/List');
+            return Inertia::render('Welcome', [
+                'products' => Product::all(),
+            ]);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Failed to delete product'], 500);
         }

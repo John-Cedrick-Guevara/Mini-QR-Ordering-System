@@ -26,7 +26,9 @@ export default function Dashboard({
     initialQrLinks,
     filters,
 }: DashboardProps) {
-    const [activeTab, setActiveTab] = useState<'orders' | 'products' | 'qrcodes'>('orders');
+    const [activeTab, setActiveTab] = useState<
+        'orders' | 'products' | 'qrcodes'
+    >('orders');
 
     // Product Modal State
     const [isProductModalOpen, setIsProductModalOpen] = useState(false);
@@ -113,9 +115,7 @@ export default function Dashboard({
 
                     {/* QR Codes View */}
                     {activeTab === 'qrcodes' && (
-                        <AdminQrCodesTab
-                            qrLinks={initialQrLinks || []}
-                        />
+                        <AdminQrCodesTab qrLinks={initialQrLinks || []} />
                     )}
                 </div>
             </main>

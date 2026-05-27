@@ -42,7 +42,7 @@ class DashboardController extends Controller
 
         $products = $productsQuery->orderBy('created_at', 'desc')->get();
         $orders = $ordersQuery->orderBy('created_at', 'desc')->get();
-        
+
         $qrLinks = $qrLinksQuery->orderBy('created_at', 'desc')->get()->map(function ($link) {
             $link->svg = (string) QrCode::size(150)->generate($link->url);
             return $link;

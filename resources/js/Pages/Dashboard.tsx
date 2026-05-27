@@ -3,6 +3,7 @@ import { useState } from 'react';
 import AdminOrdersTab from '../Components/Admin/AdminOrdersTab';
 import AdminProductModal from '../Components/Admin/AdminProductModal';
 import AdminProductsTab from '../Components/Admin/AdminProductsTab';
+import AdminQrCodesTab from '../Components/Admin/AdminQrCodesTab';
 import AdminSidebar from '../Components/Admin/AdminSidebar';
 import { Order } from '../types/admin';
 import { Product } from './Products/types';
@@ -10,6 +11,7 @@ import { Product } from './Products/types';
 interface DashboardProps {
     initialProducts: Product[];
     initialOrders: Order[];
+    initialQrLinks: any[];
     filters: {
         search_products: string;
         filter_product_status: string;
@@ -21,9 +23,10 @@ interface DashboardProps {
 export default function Dashboard({
     initialProducts,
     initialOrders,
+    initialQrLinks,
     filters,
 }: DashboardProps) {
-    const [activeTab, setActiveTab] = useState<'orders' | 'products'>('orders');
+    const [activeTab, setActiveTab] = useState<'orders' | 'products' | 'qrcodes'>('orders');
 
     // Product Modal State
     const [isProductModalOpen, setIsProductModalOpen] = useState(false);
@@ -105,6 +108,13 @@ export default function Dashboard({
                                 status: filters.filter_product_status,
                             }}
                             onOpenModal={handleOpenProductModal}
+                        />
+                    )}
+
+                    {/* QR Codes View */}
+                    {activeTab === 'qrcodes' && (
+                        <AdminQrCodesTab
+                            qrLinks={initialQrLinks || []}
                         />
                     )}
                 </div>

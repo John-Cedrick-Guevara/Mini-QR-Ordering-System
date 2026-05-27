@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Order;
+use App\Models\QrLink;
 use Inertia\Inertia;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class DashboardController extends Controller
 {
@@ -13,6 +15,7 @@ class DashboardController extends Controller
     {
         $productsQuery = Product::query();
         $ordersQuery = Order::with('items.product');
+        $qrLinksQuery = QrLink::query();
 
         // Products Search & Filter
         if ($request->filled('search_products')) {
@@ -39,10 +42,16 @@ class DashboardController extends Controller
 
         $products = $productsQuery->orderBy('created_at', 'desc')->get();
         $orders = $ordersQuery->orderBy('created_at', 'desc')->get();
+        
+        $qrLinks = $qrLinksQuery->orderBy('created_at', 'desc')->get()->map(function ($link) {
+            $link->svg = (string) QrCode::size(150)->generate($link->url);
+            return $link;
+        });
 
         return Inertia::render('Dashboard', [
             'initialProducts' => $products,
             'initialOrders' => $orders,
+            'initialQrLinks' => $qrLinks,
             'filters' => [
                 'search_products' => $request->input('search_products', ''),
                 'filter_product_status' => $request->input('filter_product_status', 'all'),

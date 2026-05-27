@@ -1,5 +1,13 @@
 import { Product } from '../Pages/Products/types';
 
+export interface QrLink {
+    id: number;
+    title: string | null;
+    url: string;
+    svg: string;
+    created_at: string;
+}
+
 export interface OrderItem {
     id: number;
     order_id: number;

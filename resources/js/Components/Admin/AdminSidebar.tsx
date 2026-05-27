@@ -1,8 +1,8 @@
 import { router } from '@inertiajs/react';
 
 interface AdminSidebarProps {
-    activeTab: 'orders' | 'products';
-    setActiveTab: (tab: 'orders' | 'products') => void;
+    activeTab: 'orders' | 'products' | 'qrcodes';
+    setActiveTab: (tab: 'orders' | 'products' | 'qrcodes') => void;
 }
 
 export default function AdminSidebar({
@@ -44,6 +44,16 @@ export default function AdminSidebar({
                     }`}
                 >
                     Products
+                </button>
+                <button
+                    onClick={() => setActiveTab('qrcodes')}
+                    className={`w-full px-4 py-3 text-left font-sans text-sm uppercase tracking-widest transition-colors ${
+                        activeTab === 'qrcodes'
+                            ? 'bg-[#FDF9F1] text-[#0F0F0F]'
+                            : 'text-[#E5E1D8] hover:bg-[#111] hover:text-white'
+                    }`}
+                >
+                    QR Codes
                 </button>
             </nav>
 

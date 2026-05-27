@@ -25,6 +25,11 @@ Route::middleware('auth')->group(function () {
     // orders routes
     Route::get('/orders', [\App\Http\Controllers\OrderController::class, 'index'])->name('orders.index');
     Route::put('/orders/{order}', [\App\Http\Controllers\OrderController::class, 'update'])->name('orders.update');
+
+    // qr links routes
+    Route::post('/qr-links', [\App\Http\Controllers\QrLinkController::class, 'store'])->name('qr-links.store');
+    Route::put('/qr-links/{qrLink}', [\App\Http\Controllers\QrLinkController::class, 'update'])->name('qr-links.update');
+    Route::delete('/qr-links/{qrLink}', [\App\Http\Controllers\QrLinkController::class, 'destroy'])->name('qr-links.destroy');
 });
 
 require __DIR__ . '/auth.php';

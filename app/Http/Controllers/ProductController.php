@@ -3,18 +3,35 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class ProductController extends Controller
 {
     //
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $products = Product::all();
+            $searchQuery = $request->input('search');
+            $page = $request->input('page', 1);
+
+            Log::info('Search Query:', ['search' => $searchQuery, 'page' => $page]);
+
+            $products = Product::query()
+                ->when($searchQuery, function ($query, $searchQuery) {
+                    $query->where('name', 'like', "%{$searchQuery}%")
+                        ->orWhere('description', 'like', "%{$searchQuery}%");
+                })
+                ->latest()
+                ->paginate(6, ['*'], 'page', $page)
+                ->withQueryString();
 
             return Inertia::render('Welcome', [
                 'products' => $products,
+                'filters' => [
+                    'search' => $searchQuery,
+                ],
             ]);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Failed to retrieve products'], 500);

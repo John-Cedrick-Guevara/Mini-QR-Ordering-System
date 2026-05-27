@@ -1,5 +1,5 @@
 import { PageProps } from '@/types';
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
 import Show from './Products/Show';
 import { Product } from './Products/types';
@@ -109,20 +109,29 @@ const FALLBACK_PRODUCTS: Product[] = [
 ];
 
 interface WelcomePageProps extends PageProps {
-    products?: Product[];
+    products?: { data?: Product[]; total?: number } | null;
+    filters?: {
+        search?: string;
+    };
 }
 
-export default function Welcome({ products = [] }: WelcomePageProps) {
+export default function Welcome({
+    products = { data: [] },
+    filters,
+}: WelcomePageProps) {
+    console.log('Products:', products);
+    console.log('Products Count:', products?.data?.length);
+    console.log('Filters:', filters);
     const menuItems = useMemo(() => {
-        // Ensure `products` is treated as an array. Inertia may pass a paginator
-        // object with a `data` array when server-side pagination is used.
         const list = Array.isArray(products)
             ? products
-            : products && (products.data ?? []);
+            : ((products as { data?: Product[] } | null | undefined)?.data ??
+              []);
         return list && list.length > 0 ? list : FALLBACK_PRODUCTS;
     }, [products]);
 
     const [currentPage, setCurrentPage] = useState(1);
+    const [searchQuery, setSearchQuery] = useState(filters?.search || '');
     const [cart, setCart] = useState<CartItem[]>([]);
     const [isCartOpen, setIsCartOpen] = useState(false);
 
@@ -150,6 +159,32 @@ export default function Welcome({ products = [] }: WelcomePageProps) {
         window.addEventListener('popstate', handlePopState);
         return () => window.removeEventListener('popstate', handlePopState);
     }, []);
+
+    // search query debounce
+    useEffect(() => {
+        const delayDebounce = setTimeout(() => {
+            router.get(
+                '/',
+                {
+                    search: searchQuery,
+                },
+                { preserveState: true, replace: true, preserveScroll: true },
+            ); // Keeps the input focused while typing
+        }, 500);
+        return () => clearTimeout(delayDebounce);
+    }, [searchQuery]);
+
+    // page change sync
+    useEffect(() => {
+        router.get(
+            '/',
+            {
+                page: currentPage,
+                search: searchQuery,
+            },
+            { preserveState: true, replace: true, preserveScroll: true },
+        );
+    }, [currentPage]);
 
     const handleSelectProduct = (id: number) => {
         setSelectedProductId(id);
@@ -197,13 +232,6 @@ export default function Welcome({ products = [] }: WelcomePageProps) {
 
     const totalCartItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-    // Pagination slicing
-    const totalPages = Math.ceil(menuItems.length / itemsPerPage);
-    const paginatedItems = useMemo(() => {
-        const start = (currentPage - 1) * itemsPerPage;
-        return menuItems.slice(start, start + itemsPerPage);
-    }, [menuItems, currentPage]);
-
     const selectedProduct = useMemo(() => {
         if (!selectedProductId) return null;
         return menuItems.find((p) => p.id === selectedProductId) || null;
@@ -245,12 +273,18 @@ export default function Welcome({ products = [] }: WelcomePageProps) {
             <RulesSection />
 
             <MenuListing
-                items={paginatedItems}
+                items={products?.data || []}
                 currentPage={currentPage}
-                totalPages={totalPages}
+                totalPages={
+                    products?.total
+                        ? Math.ceil(products.total / itemsPerPage)
+                        : 1
+                }
                 onPageChange={setCurrentPage}
                 onSelectProduct={handleSelectProduct}
                 onAddToCart={(product) => handleAddToCart(product, 1)}
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
             />
 
             <GallerySection />

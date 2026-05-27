@@ -1,17 +1,78 @@
 import { router } from '@inertiajs/react';
+import { useEffect, useState } from 'react';
 import { Order } from '../../types/admin';
 
 interface AdminOrdersTabProps {
     orders: Order[];
+    filters: { search: string; status: string };
 }
 
-export default function AdminOrdersTab({ orders }: AdminOrdersTabProps) {
-    const handleUpdateOrderStatus = (id: number, status: string) => {
-        router.put(`/orders/${id}`, { status }, { preserveScroll: true });
+export default function AdminOrdersTab({
+    orders,
+    filters,
+}: AdminOrdersTabProps) {
+    const [search, setSearch] = useState(filters.search);
+    const [status, setStatus] = useState(filters.status);
+
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            router.get(
+                '/dashboard',
+                { search_orders: search, filter_order_status: status },
+                { preserveState: true, preserveScroll: true, replace: true },
+            );
+        }, 300);
+        return () => clearTimeout(timeout);
+    }, [search, status]);
+
+    const handleUpdateOrderStatus = (id: number, orderStatus: string) => {
+        router.put(
+            `/orders/${id}`,
+            { status: orderStatus },
+            { preserveScroll: true },
+        );
     };
 
     return (
         <div className="space-y-6">
+            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <input
+                    type="text"
+                    placeholder="Search by ID, name or email..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full border-b border-[#333] bg-transparent pb-2 text-sm transition-colors focus:border-[#C4A484] focus:outline-none focus:ring-0 sm:max-w-md"
+                />
+                <select
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value)}
+                    className="cursor-pointer appearance-none border border-[#333] bg-transparent px-4 py-2 font-sans text-xs uppercase tracking-[0.1em] text-[#E5E1D8] transition-colors focus:border-[#C4A484] focus:outline-none"
+                >
+                    <option value="all" className="bg-[#111] text-[#E5E1D8]">
+                        All Statuses
+                    </option>
+                    <option
+                        value="cancelled"
+                        className="bg-[#111] text-[#E5E1D8]"
+                    >
+                        Cancelled
+                    </option>
+                    <option
+                        value="preparing"
+                        className="bg-[#111] text-[#E5E1D8]"
+                    >
+                        Preparing
+                    </option>
+
+                    <option
+                        value="completed"
+                        className="bg-[#111] text-[#E5E1D8]"
+                    >
+                        Completed
+                    </option>
+                </select>
+            </div>
+
             {!orders || orders.length === 0 ? (
                 <div className="border border-[#222] bg-[#111] p-12 text-center">
                     <p className="font-serif text-xl text-[#E5E1D8]">

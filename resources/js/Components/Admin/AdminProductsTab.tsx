@@ -1,15 +1,32 @@
 import { router } from '@inertiajs/react';
+import { useEffect, useState } from 'react';
 import { Product } from '../../Pages/Products/types';
 
 interface AdminProductsTabProps {
     products: Product[];
+    filters: { search: string; status: string };
     onOpenModal: (product?: Product) => void;
 }
 
 export default function AdminProductsTab({
     products,
+    filters,
     onOpenModal,
 }: AdminProductsTabProps) {
+    const [search, setSearch] = useState(filters.search);
+    const [status, setStatus] = useState(filters.status);
+
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            router.get(
+                '/dashboard',
+                { search_products: search, filter_product_status: status },
+                { preserveState: true, preserveScroll: true, replace: true },
+            );
+        }, 300);
+        return () => clearTimeout(timeout);
+    }, [search, status]);
+
     const handleDeleteProduct = (id: number) => {
         if (confirm('Are you sure you want to delete this product?')) {
             router.delete(`/products/${id}`, { preserveScroll: true });
@@ -18,6 +35,37 @@ export default function AdminProductsTab({
 
     return (
         <div className="space-y-6">
+            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <input
+                    type="text"
+                    placeholder="Search creations..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full border-b border-[#333] bg-transparent pb-2 text-sm transition-colors focus:border-[#C4A484] focus:outline-none focus:ring-0 sm:max-w-md"
+                />
+                <select
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value)}
+                    className="cursor-pointer appearance-none border border-[#333] bg-transparent px-4 py-2 font-sans text-xs uppercase tracking-[0.1em] text-[#E5E1D8] transition-colors focus:border-[#C4A484] focus:outline-none"
+                >
+                    <option value="all" className="bg-[#111] text-[#E5E1D8]">
+                        All Statuses
+                    </option>
+                    <option
+                        value="available"
+                        className="bg-[#111] text-[#E5E1D8]"
+                    >
+                        Available
+                    </option>
+                    <option
+                        value="unavailable"
+                        className="bg-[#111] text-[#E5E1D8]"
+                    >
+                        Unavailable
+                    </option>
+                </select>
+            </div>
+
             {!products || products.length === 0 ? (
                 <div className="border border-[#222] bg-[#111] p-12 text-center">
                     <p className="font-serif text-xl text-[#E5E1D8]">

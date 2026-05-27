@@ -10,11 +10,18 @@ import { Product } from './Products/types';
 interface DashboardProps {
     initialProducts: Product[];
     initialOrders: Order[];
+    filters: {
+        search_products: string;
+        filter_product_status: string;
+        search_orders: string;
+        filter_order_status: string;
+    };
 }
 
 export default function Dashboard({
     initialProducts,
     initialOrders,
+    filters,
 }: DashboardProps) {
     const [activeTab, setActiveTab] = useState<'orders' | 'products'>('orders');
 
@@ -80,13 +87,23 @@ export default function Dashboard({
                 <div className="p-8">
                     {/* Orders View */}
                     {activeTab === 'orders' && (
-                        <AdminOrdersTab orders={initialOrders} />
+                        <AdminOrdersTab
+                            orders={initialOrders}
+                            filters={{
+                                search: filters.search_orders,
+                                status: filters.filter_order_status,
+                            }}
+                        />
                     )}
 
                     {/* Products View */}
                     {activeTab === 'products' && (
                         <AdminProductsTab
                             products={initialProducts}
+                            filters={{
+                                search: filters.search_products,
+                                status: filters.filter_product_status,
+                            }}
                             onOpenModal={handleOpenProductModal}
                         />
                     )}

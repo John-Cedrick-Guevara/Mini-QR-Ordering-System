@@ -9,17 +9,10 @@ Route::get('/', [\App\Http\Controllers\ProductController::class, 'index'])->name
 // order creation
 Route::post('/orders', [\App\Http\Controllers\OrderController::class, 'store'])->name('orders.store');
 
-Route::get('/dashboard', function () {
-    $products = \App\Models\Product::orderBy('created_at', 'desc')->get();
-    $orders = \App\Models\Order::with('items.product')->orderBy('created_at', 'desc')->get();
-
-    return Inertia::render('Dashboard', [
-        'initialProducts' => $products,
-        'initialOrders' => $orders,
-    ]);
-})->middleware(['auth', 'verified'])->name('dashboard');
-
 Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])
+        ->name('dashboard');
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

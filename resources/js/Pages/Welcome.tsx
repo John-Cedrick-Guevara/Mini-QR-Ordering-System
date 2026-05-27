@@ -295,7 +295,10 @@ export default function Welcome({
 
             <CartSidebar
                 isOpen={isCartOpen}
-                onClose={() => setIsCartOpen(false)}
+                onClose={() => {
+                    setIsCartOpen(false);
+                    setCart([]); 
+                }}
                 cart={cart}
                 onUpdateQuantity={handleUpdateQuantity}
                 onRemove={handleRemoveFromCart}

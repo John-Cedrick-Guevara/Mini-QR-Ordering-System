@@ -64,12 +64,29 @@ class OrderController extends Controller
             // If everything runs perfectly, commit changes to MySQL
             DB::commit();
 
-            return response()->json(['message' => 'Order created successfully'], 201);
+            // Instead of redirecting to a different route, redirect back to the current view
+            return redirect()->back()->with('success', 'Order created successfully!');
         } catch (\Exception $e) {
             // If any error occurs, rollback changes to MySQL
             DB::rollBack();
 
-            return response()->json(['error' => 'Failed to create order'], 500);
+            return redirect()->back()->with('error', 'Failed to create order');
+        }
+    }
+
+
+
+    public function update(Request $request, Order $order)
+    {
+        $validatedData = $request->validate([
+            'status' => 'required|string|in:pending,preparing,ready,completed',
+        ]);
+
+        try {
+            $order->update($validatedData);
+            return redirect()->back()->with('success', 'Order status updated successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to update order status');
         }
     }
 }

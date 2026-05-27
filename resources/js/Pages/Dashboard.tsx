@@ -1,26 +1,106 @@
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
+import { useState } from 'react';
+import AdminOrdersTab from '../Components/Admin/AdminOrdersTab';
+import AdminProductModal from '../Components/Admin/AdminProductModal';
+import AdminProductsTab from '../Components/Admin/AdminProductsTab';
+import AdminSidebar from '../Components/Admin/AdminSidebar';
+import { Order } from '../types/admin';
+import { Product } from './Products/types';
 
-export default function Dashboard() {
+interface DashboardProps {
+    initialProducts: Product[];
+    initialOrders: Order[];
+}
+
+export default function Dashboard({
+    initialProducts,
+    initialOrders,
+}: DashboardProps) {
+    const [activeTab, setActiveTab] = useState<'orders' | 'products'>('orders');
+
+    // Product Modal State
+    const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+    const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+    const [productForm, setProductForm] = useState({
+        name: '',
+        description: '',
+        price: '',
+        image_url: '',
+        is_available: true,
+    });
+
+    const handleOpenProductModal = (product?: Product) => {
+        if (product) {
+            setEditingProduct(product);
+            setProductForm({
+                name: product.name,
+                description: product.description || '',
+                price: product.price.toString(),
+                image_url: product.image_url || '',
+                is_available: product.is_available ?? true,
+            });
+        } else {
+            setEditingProduct(null);
+            setProductForm({
+                name: '',
+                description: '',
+                price: '',
+                image_url: '',
+                is_available: true,
+            });
+        }
+        setIsProductModalOpen(true);
+    };
+
     return (
-        <AuthenticatedLayout
-            header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Dashboard
-                </h2>
-            }
-        >
-            <Head title="Dashboard" />
+        <div className="flex min-h-screen bg-[#0F0F0F] font-sans text-[#FDF9F1] selection:bg-[#FDF9F1] selection:text-[#0F0F0F]">
+            <Head title="Admin Dashboard | cubelicious" />
 
-            <div className="py-12">
-                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                    <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                        <div className="p-6 text-gray-900">
-                            You're logged in!
-                        </div>
-                    </div>
+            {/* Sidebar */}
+            <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+
+            {/* Main Content */}
+            <main className="flex-1 overflow-y-auto">
+                <header className="flex items-center justify-between border-b border-[#222] bg-[#0C0C0C] p-8">
+                    <h1 className="font-serif text-3xl">
+                        {activeTab === 'orders'
+                            ? 'Manage Orders'
+                            : 'Menu Masterpiece'}
+                    </h1>
+                    {activeTab === 'products' && (
+                        <button
+                            onClick={() => handleOpenProductModal()}
+                            className="bg-[#C4A484] px-6 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[#0F0F0F] transition-colors hover:bg-white"
+                        >
+                            + Add Creation
+                        </button>
+                    )}
+                </header>
+
+                <div className="p-8">
+                    {/* Orders View */}
+                    {activeTab === 'orders' && (
+                        <AdminOrdersTab orders={initialOrders} />
+                    )}
+
+                    {/* Products View */}
+                    {activeTab === 'products' && (
+                        <AdminProductsTab
+                            products={initialProducts}
+                            onOpenModal={handleOpenProductModal}
+                        />
+                    )}
                 </div>
-            </div>
-        </AuthenticatedLayout>
+            </main>
+
+            {/* Product Modal */}
+            <AdminProductModal
+                isOpen={isProductModalOpen}
+                onClose={() => setIsProductModalOpen(false)}
+                editingProduct={editingProduct}
+                productForm={productForm}
+                setProductForm={setProductForm}
+            />
+        </div>
     );
 }

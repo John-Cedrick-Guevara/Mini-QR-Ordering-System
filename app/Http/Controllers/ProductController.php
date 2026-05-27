@@ -51,9 +51,9 @@ class ProductController extends Controller
 
             Product::create($validatedData);
 
-            return redirect()->route('products.index');
+            return redirect()->back()->with('success', 'Order created successfully!');
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to create product'], 500);
+            return redirect()->back()->with('error', 'Failed to create product');
         }
     }
 
@@ -70,11 +70,9 @@ class ProductController extends Controller
 
             $product->update($validatedData);
 
-            return Inertia::render('Welcome', [
-                'products' => Product::all(),
-            ]);
+            return redirect()->back()->with('success', 'Product updated successfully!');
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to update product'], 500);
+            return redirect()->back()->with('error', 'Failed to update product');
         }
     }
 
@@ -83,11 +81,9 @@ class ProductController extends Controller
         try {
             $product->delete();
 
-            return Inertia::render('Welcome', [
-                'products' => Product::all(),
-            ]);
+            return redirect()->back()->with('success', 'Product deleted successfully!');
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to delete product'], 500);
+            return redirect()->back()->with('error', 'Failed to delete product');
         }
     }
 }

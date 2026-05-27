@@ -6,9 +6,17 @@ use Inertia\Inertia;
 
 // public routes
 Route::get('/', [\App\Http\Controllers\ProductController::class, 'index'])->name('products.home');
+// order creation
+Route::post('/orders', [\App\Http\Controllers\OrderController::class, 'store'])->name('orders.store');
 
 Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
+    $products = \App\Models\Product::orderBy('created_at', 'desc')->get();
+    $orders = \App\Models\Order::with('items.product')->orderBy('created_at', 'desc')->get();
+
+    return Inertia::render('Dashboard', [
+        'initialProducts' => $products,
+        'initialOrders' => $orders,
+    ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
@@ -23,7 +31,7 @@ Route::middleware('auth')->group(function () {
 
     // orders routes
     Route::get('/orders', [\App\Http\Controllers\OrderController::class, 'index'])->name('orders.index');
-    Route::post('/orders', [\App\Http\Controllers\OrderController::class, 'store'])->name('orders.store');
+    Route::put('/orders/{order}', [\App\Http\Controllers\OrderController::class, 'update'])->name('orders.update');
 });
 
 require __DIR__ . '/auth.php';
